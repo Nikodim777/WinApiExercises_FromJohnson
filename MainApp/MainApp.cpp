@@ -16,6 +16,9 @@ enum class CommandCode
     __Count
 };
 
+static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { L"cpTextC" };
+static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { 4 };
+
 VOID PrintHelp()
 {
     std::wcout << L"Варианты использования:" << std::endl <<
@@ -33,9 +36,7 @@ int wmain(DWORD argc, PCWSTR argv[])
         return ERROR_BAD_ARGUMENTS;
     }
 
-    std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { L"cpTextC" };
-    std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { 4 };
-    std::array<std::function<void()>, static_cast<int>(CommandCode::__Count)> a_Functions = { 
+    std::array<std::function<void()>, static_cast<int>(CommandCode::__Count)> a_Functions = {
         [&argv]() { CopyTextFileC(argv[2], argv[3]); }
     };
 
