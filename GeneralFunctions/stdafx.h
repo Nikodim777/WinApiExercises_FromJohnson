@@ -1,6 +1,7 @@
-﻿#ifndef PCH_H
-#define PCH_H
+﻿#pragma once
+
+#include "stdio.h"
+#include "errno.h"
+#include "Windows.h"
 
 #include "GeneralFunctions.h"
-
-#endif
