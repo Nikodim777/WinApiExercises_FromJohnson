@@ -12,17 +12,19 @@
 
 enum class CommandCode
 {
-    CP,
+    CP_TEXT_C,
+    CP_TEXT_CPP,
     __Count
 };
 
-static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { L"cpTextC" };
-static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { 4 };
+static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { L"cpTextC", L"cpCpp" };
+static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { 4, 4 };
 
 VOID PrintHelp()
 {
     std::wcout << L"Варианты использования:" << std::endl <<
-        L"MainApp cpTextC SRC DST - копирование файла SRC в файл DST." << std::endl;
+        L"MainApp cpTextC SRC DST - копирование utf-16 файла SRC в файл DST, реализация на c." << std::endl <<
+        L"MainApp cpCpp SRC DST - копирование файла SRC в файл DST, реализация на с++." << std::endl;
 }
 
 int wmain(DWORD argc, PCWSTR argv[])
@@ -37,7 +39,8 @@ int wmain(DWORD argc, PCWSTR argv[])
     }
 
     std::array<std::function<void()>, static_cast<int>(CommandCode::__Count)> a_Functions = {
-        [&argv]() { CopyTextFileC(argv[2], argv[3]); }
+        [&argv]() { CopyTextFileC(argv[2], argv[3]); },
+        [&argv]() { CopyFileCpp(argv[2], argv[3]); }
     };
 
     size_t i = 0;
