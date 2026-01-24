@@ -45,6 +45,10 @@ int wmain(DWORD argc, PCWSTR argv[])
         [&argv]() { CopyFileCpp(argv[2], argv[3]); }
     };
 
+    static_assert(static_cast<size_t>(CommandCode::__Count) == a_wszCommands.size());
+    static_assert(a_cArgs.size() == a_wszCommands.size());
+    static_assert(a_Functions.size() == a_wszCommands.size());
+
     size_t i = 0;
     for( ;i < static_cast<size_t>(CommandCode::__Count); i++)
     {
