@@ -33,7 +33,7 @@ CopyTextFileC(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath)
 		PrintWideErrorC(L"Не удалось открыть исходный файл", result);
 		return;
 	}
-	result = _wfopen_s(&psFileOut, wszDstPath, L"w,ccs=UNICODE");
+	result = _wfopen_s(&psFileOut, wszDstPath, L"w,ccs=UTF-16LE");
 	if (result != 0 || psFileOut == NULL)
 	{
 		PrintWideErrorC(L"Не удалось создать файл назначения", result);
@@ -193,7 +193,7 @@ CopyFileCDiff(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath, _In_ BOOL isTb)
 		PrintWideErrorC(L"Не удалось открыть исходный файл", result);
 		return;
 	}
-	result = _wfopen_s(&psFileOut, wszDstPath, isTb ? L"wb" : L"w,ccs=UNICODE");
+	result = _wfopen_s(&psFileOut, wszDstPath, isTb ? L"wb" : L"w,ccs=UTF-16LE");
 	if (result != 0 || psFileOut == NULL)
 	{
 		PrintWideErrorC(L"Не удалось создать файл назначения", result);
