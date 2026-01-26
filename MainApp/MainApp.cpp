@@ -4,9 +4,10 @@
 #include "windows.h"
 
 #include <array>
-#include <string>
+#include <chrono>
 #include <iostream>
 #include <functional>
+#include <string>
 
 #include "GeneralFunctions.h"
 
@@ -69,7 +70,11 @@ int wmain(DWORD argc, PCWSTR argv[])
             return ERROR_BAD_ARGUMENTS;
         }
 
+        auto start = std::chrono::high_resolution_clock::now();
         a_Functions[i]();
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        std::wcout << L"Время выполнения " << duration.count() << L" микросекунд." << std::endl;
         break;
     }
 
