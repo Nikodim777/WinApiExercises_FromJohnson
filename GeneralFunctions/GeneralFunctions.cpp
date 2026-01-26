@@ -131,3 +131,46 @@ CopyFileCpp(_In_ const std::wstring& srcPath, _In_ const std::wstring& dstPath)
 	dstStream << srcStream.rdbuf();
 	std::wcout << L"Копирование файла " << srcPath << L" в " << dstPath << L" завершено!" << std::endl;
 }
+
+// Функция копирования файлов. Реализация на С использованием winapi.
+VOID
+CopyFileCWin(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath)
+{
+	HANDLE hSrcFile = INVALID_HANDLE_VALUE;
+	HANDLE hDstFile = INVALID_HANDLE_VALUE;
+
+	wprintf(L"Открытие файлов %s и %s\n", wszSrcPath, wszDstPath);
+	hSrcFile = CreateFile(wszSrcPath, FILE_READ_ACCESS, 0, NULL, OPEN_EXISTING, 0, NULL);
+	if (hSrcFile == INVALID_HANDLE_VALUE)
+	{
+		wprintf(L"Ошибка при открытии файла. Код ошибки - %lu.", GetLastError());
+		return;
+	}
+	hDstFile = CreateFile(wszDstPath, FILE_WRITE_ACCESS, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hDstFile == INVALID_HANDLE_VALUE)
+	{
+		wprintf(L"Ошибка при создании файла. Код ошибки - %lu.", GetLastError());
+		CloseHandle(hDstFile);
+		return;
+	}
+
+	BOOL bResult = FALSE;
+	DWORD cbRead = 0;
+	DWORD cbWritten = 0;
+	BYTE buffer[MAX_PATH] = { 0 };
+	wprintf(L"Копирование файла %s в %s\n", wszSrcPath, wszDstPath);
+	while ((bResult = ReadFile(hSrcFile, buffer, MAX_PATH, &cbRead, NULL)) && cbRead > 0)
+	{
+		bResult = WriteFile(hDstFile, buffer, cbRead, &cbWritten, NULL);
+		if (!bResult || cbRead != cbWritten)
+		{
+			break;
+		}
+	}
+	bResult ?
+		wprintf(L"Копирование файла %s в %s завершено!\n", wszSrcPath, wszDstPath) :
+		wprintf(L"Неустранимая ошибка чтения/записи. Код ошибки - %lu.", GetLastError());
+	CloseHandle(hSrcFile);
+	CloseHandle(hDstFile);
+	return;
+}
