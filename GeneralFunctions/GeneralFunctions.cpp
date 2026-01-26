@@ -174,3 +174,51 @@ CopyFileCWin(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath)
 	CloseHandle(hDstFile);
 	return;
 }
+
+// Функция копирования текстовых файлов в разных режимах. Реализация на чистом С.
+// [in] isTb - если true, файл-источник открывается 
+// как текстовый, а целевой файл - как бинарный, иначе - наоборот. 
+VOID
+CopyFileCDiff(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath, _In_ BOOL isTb)
+{
+	WCHAR wchBuffer[MAX_PATH] = { 0 };
+	FILE* psFileIn = NULL;
+	FILE* psFileOut = NULL;
+	errno_t result = 0;
+
+	wprintf(L"Открытие файлов %s и %s\n", wszSrcPath, wszDstPath);
+	result = _wfopen_s(&psFileIn, wszSrcPath, isTb ? L"r,ccs=UTF-16LE" : L"rb");
+	if (result != 0 || psFileIn == NULL)
+	{
+		PrintWideErrorC(L"Не удалось открыть исходный файл", result);
+		return;
+	}
+	result = _wfopen_s(&psFileOut, wszDstPath, isTb ? L"wb" : L"w,ccs=UNICODE");
+	if (result != 0 || psFileOut == NULL)
+	{
+		PrintWideErrorC(L"Не удалось создать файл назначения", result);
+		fclose(psFileIn);
+		return;
+	}
+
+	SIZE_T cRead = 0;
+	SIZE_T cWritten = 0;
+	wprintf(L"Копирование файла %s в %s\n", wszSrcPath, wszDstPath);
+	while ((cRead = fread(wchBuffer, sizeof(WCHAR), MAX_PATH, psFileIn)) > 0)
+	{
+		cWritten = fwrite(wchBuffer, sizeof(WCHAR), cRead, psFileOut);
+		if (cWritten != cRead)
+		{
+			PrintWideErrorC(L"Неустранимая ошибка при записи в файл", result);
+			break;
+		}
+	}
+	if (feof(psFileIn) == 0)
+	{
+		PrintWideErrorC(L"Ошибка при чтении файла", result);
+	}
+	wprintf(L"Копирование файла %s в %s завершено!\n", wszSrcPath, wszDstPath);
+
+	fclose(psFileIn);
+	fclose(psFileOut);
+}
