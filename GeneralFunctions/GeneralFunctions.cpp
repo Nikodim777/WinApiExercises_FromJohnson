@@ -230,6 +230,6 @@ CopyFileWinAux(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath)
 	BOOL bResult = FALSE;
 	bResult = CopyFile(wszSrcPath, wszDstPath, FALSE);
 	bResult ?
-		wprintf(L"Копирование успешно завершено!") :
+		wprintf(L"Копирование успешно завершено!\n") :
 		wprintf(L"При копировании произошла ошибка! Код ошибки - %lu.\n", GetLastError());
 }
