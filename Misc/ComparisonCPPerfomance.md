@@ -1,4 +1,4 @@
-﻿#Comparison of copy functions perfomance
+﻿# Comparison of copy functions perfomance
 Two measurements were taken for each test, average used as result.
 All results are in microseconds.
 The results determined on medium hardware and old hdd.
