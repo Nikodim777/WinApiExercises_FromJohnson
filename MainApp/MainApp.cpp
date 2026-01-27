@@ -22,8 +22,8 @@ enum class CommandCode
     __Count
 };
 
-static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { L"cpTextC", L"cpC", L"cpCpp", L"cpCWin", L"cpCDiff", L"cpWinAux"};
-static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { 4, 4, 4, 4, 5, 4 };
+static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { { L"cpTextC", L"cpC", L"cpCpp", L"cpCWin", L"cpCDiff", L"cpWinAux"} };
+static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { { 4, 4, 4, 4, 5, 4 } };
 
 VOID PrintHelp()
 {
