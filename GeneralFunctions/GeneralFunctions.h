@@ -21,3 +21,7 @@ CopyFileCWin(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath);
 // как текстовый, а целевой файл - как бинарный, иначе - наоборот. 
 VOID
 CopyFileCDiff(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath, _In_ BOOL isTb);
+
+// Функция копирования файло, использующая вспомогательную функцию winapi.
+VOID
+CopyFileWinAux(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath);

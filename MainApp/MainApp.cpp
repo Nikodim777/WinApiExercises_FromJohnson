@@ -18,11 +18,12 @@ enum class CommandCode
     CP_CPP,
     CP_C_WIN,
     CP_C_DIFF,
+    CP_WIN_AUX,
     __Count
 };
 
-static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { L"cpTextC", L"cpC", L"cpCpp", L"cpCWin", L"cpCDiff"};
-static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { 4, 4, 4, 4, 5 };
+static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { L"cpTextC", L"cpC", L"cpCpp", L"cpCWin", L"cpCDiff", L"cpWinAux"};
+static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { 4, 4, 4, 4, 5, 4 };
 
 VOID PrintHelp()
 {
@@ -32,7 +33,8 @@ VOID PrintHelp()
         L"MainApp cpCpp SRC DST - копирование файла SRC в файл DST, реализация на с++." << std::endl <<
         L"MainApp cpCWin SRC DST - копирование файла SRC в файл DST, реализация на с с использованием winapi." << std::endl <<
         L"MainApp cpCDiff SRC DST IS_TB - копирование файла SRC в файл DST в разных режимах, реализация на с." << std::endl <<
-        L"Если IS_TB = true, SRC открывается в текстовом режиме UNICODE, а DST - в бинарном режиме; иначе - наоборот." << std::endl;
+        L"Если IS_TB = true, SRC открывается в текстовом режиме UNICODE, а DST - в бинарном режиме; иначе - наоборот." << std::endl <<
+        L"MainApp cpWinAux SRC DST - копирование файла SRC в файл DST, с использованием вспомогательной функции winapi." << std::endl;
 }
 
 int wmain(DWORD argc, PCWSTR argv[])
@@ -51,7 +53,8 @@ int wmain(DWORD argc, PCWSTR argv[])
         [&argv]() { CopyFileC(argv[2], argv[3]); },
         [&argv]() { CopyFileCpp(argv[2], argv[3]); },
         [&argv]() { CopyFileCWin(argv[2], argv[3]); },
-        [&argv]() { CopyFileCDiff(argv[2], argv[3], !wcscmp(argv[4], L"true")); }
+        [&argv]() { CopyFileCDiff(argv[2], argv[3], !wcscmp(argv[4], L"true")); },
+        [&argv]() { CopyFileWinAux(argv[2], argv[3]); }
     };
 
     static_assert(static_cast<size_t>(CommandCode::__Count) == a_wszCommands.size());
