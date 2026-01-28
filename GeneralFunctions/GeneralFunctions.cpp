@@ -300,3 +300,38 @@ Prompt(_In_ PCWSTR wszPrompt,
 	CloseHandle(hConsoleIn);
 	return bResult;
 }
+
+/* Функция выводит сообщение об ошибке.
+	[in] wszErrorMsg - пользовательское сообщение об ошибке;
+	[in] dwExitCode - код завершение процесса, если не 0 - процесс завершается;
+	[in] isNeedSysMsg - флаг необходимости получения системного сообщения;
+	Ничего не возвращает. */
+VOID
+ReportError(PCWSTR wszErrorMsg,
+	DWORD dwExitCode,
+	BOOL isNeedSysMsg)
+{
+	DWORD dwError = GetLastError();
+	DWORD cwSysMsg = 0;
+	PWSTR wszSysMsg = NULL;
+	HANDLE hStdError = GetStdHandle(STD_ERROR_HANDLE);
+
+	PrintMsg(hStdError, wszErrorMsg);
+	if (!isNeedSysMsg)
+		goto END;
+
+	cwSysMsg = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dwError, 0, (LPWSTR)&wszSysMsg, 0, NULL);
+	PrintStrs(hStdError, L": ", wszSysMsg, NULL);
+	LocalFree(wszSysMsg);
+
+END:
+	PrintMsg(hStdError, L"!\n");
+	if (dwExitCode > 0)
+	{
+		ExitProcess(dwExitCode);
+	}
+	else
+	{
+		return;
+	}
+}

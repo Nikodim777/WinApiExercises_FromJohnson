@@ -49,3 +49,13 @@ Prompt(_In_ PCWSTR wszPrompt,
 	_In_ DWORD cwResponse,
 	_Out_writes_(cwResponse) PWSTR wszResponse,
 	BOOL bIsNeedEcho);
+
+/* Функция выводит сообщение об ошибке.
+	[in] wszErrorMsg - пользовательское сообщение об ошибке;
+	[in] dwExitCode - код завершение процесса, если не 0 - процесс завершается;
+	[in] isNeedSysMsg - флаг необходимости получения системного сообщения;
+	Ничего не возвращает. */
+VOID
+ReportError(PCWSTR wszErrorMsg,
+	DWORD dwExitCode,
+	BOOL isNeedSysMsg);
