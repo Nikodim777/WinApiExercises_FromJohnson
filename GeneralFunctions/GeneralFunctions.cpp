@@ -233,3 +233,70 @@ CopyFileWinAux(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath)
 		wprintf(L"Копирование успешно завершено!\n") :
 		wprintf(L"При копировании произошла ошибка! Код ошибки - %lu.\n", GetLastError());
 }
+
+// Функция выводит в консоль или файл hOut переданные в аргументах строки.
+BOOL
+PrintStrs(_In_ HANDLE hOut, ...)
+{
+	SIZE_T cwArg = 0;
+	SIZE_T cWritten = 0;
+	va_list args = NULL;
+	PCWSTR wszArg = NULL;
+	BOOL bResult = TRUE;
+
+	va_start(args, hOut);
+	while ((wszArg = va_arg(args, PCWSTR)))
+	{
+		cwArg = wcslen(wszArg);
+		bResult = WriteConsole(hOut, wszArg, cwArg, &cWritten, NULL) 
+			|| WriteFile(hOut, wszArg, cwArg * sizeof(WCHAR), &cWritten, NULL);
+		if (!bResult)
+		{
+			break;
+		}
+	}
+	va_end(args);
+	return bResult;
+}
+
+/* Функция выводит запрос пользователю и считывает ответ.
+	[in] Строка с запросом, :\n - добавляются автоматически;
+	[in] Размер буфера ответа в символах;
+	[out] Буфер ответа;
+	[in] Флаг необходимости эхо для ввода;
+	Возвращает успешность выполнения. */
+_Success_(return)
+BOOL
+Prompt(_In_ PCWSTR wszPrompt, 
+	_In_ DWORD cwResponse, 
+	_Out_writes_(cwResponse) PWSTR wszResponse, 
+	BOOL bIsNeedEcho)
+{
+	HANDLE hConsoleIn = INVALID_HANDLE_VALUE;
+	HANDLE hConsoleOut = INVALID_HANDLE_VALUE;
+	DWORD cwWritten = 0;
+	DWORD dwConsoleInMode = 0;
+	BOOL bResult = FALSE;
+
+	hConsoleIn = CreateFile(L"CONIN$", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, 0, NULL);
+	if (hConsoleIn == INVALID_HANDLE_VALUE)
+	{
+		return FALSE;
+	}
+	hConsoleOut = CreateFile(L"CONOUT$", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, 0, NULL);
+	if (hConsoleOut == INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(hConsoleIn);
+		return FALSE;
+	}
+
+	bResult = GetConsoleMode(hConsoleIn, &dwConsoleInMode) 
+		&& SetConsoleMode(hConsoleIn, (dwConsoleInMode & ~ENABLE_ECHO_INPUT) | (bIsNeedEcho ? ENABLE_ECHO_INPUT : 0))
+		&& PrintStrs(hConsoleOut, wszPrompt, L":\n", NULL)
+		&& ReadConsole(hConsoleIn, wszResponse, cwResponse, &cwWritten, NULL);
+	wszResponse[cwWritten - 2] = '\0';
+
+	CloseHandle(hConsoleOut);
+	CloseHandle(hConsoleIn);
+	return bResult;
+}

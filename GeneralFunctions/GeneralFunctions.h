@@ -25,3 +25,27 @@ CopyFileCDiff(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath, _In_ BOOL isTb);
 // Функция копирования файло, использующая вспомогательную функцию winapi.
 VOID
 CopyFileWinAux(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath);
+
+// Функция выводит в консоль или файл hOut переданные в аргументах строки.
+BOOL
+PrintStrs(_In_ HANDLE hOut, ...);
+
+// Функция выводит в консоль или файл hOut переданное сообщение.
+inline BOOL
+PrintMsg(_In_ HANDLE hOut, PCWSTR wszMsg)
+{
+	return PrintStrs(hOut, wszMsg, NULL);
+}
+
+/* Функция выводит запрос пользователю и считывает ответ.
+	[in] Строка с запросом, :\n - добавляются автоматически;
+	[in] Размер буфера ответа в символах;
+	[out] Буфер ответа;
+	[in] Флаг необходимости эхо для ввода;
+	Возвращает успешность выполнения. */
+_Success_(return)
+BOOL
+Prompt(_In_ PCWSTR wszPrompt,
+	_In_ DWORD cwResponse,
+	_Out_writes_(cwResponse) PWSTR wszResponse,
+	BOOL bIsNeedEcho);

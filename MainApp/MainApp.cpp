@@ -19,11 +19,15 @@ enum class CommandCode
     CP_C_WIN,
     CP_C_DIFF,
     CP_WIN_AUX,
+    PRINT_STRS,
+    PROMPT,
     __Count
 };
 
-static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { { L"cpTextC", L"cpC", L"cpCpp", L"cpCWin", L"cpCDiff", L"cpWinAux"} };
-static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { { 4, 4, 4, 4, 5, 4 } };
+static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { { L"cpTextC", L"cpC", L"cpCpp", L"cpCWin", L"cpCDiff",
+    L"cpWinAux", L"printStrs", L"prompt" }};
+static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { { 4, 4, 4, 4, 5, 
+    4, 6, 3 } };
 
 VOID PrintHelp()
 {
@@ -34,7 +38,9 @@ VOID PrintHelp()
         L"MainApp cpCWin SRC DST - копирование файла SRC в файл DST, реализация на с с использованием winapi." << std::endl <<
         L"MainApp cpCDiff SRC DST IS_TB - копирование файла SRC в файл DST в разных режимах, реализация на с." << std::endl <<
         L"Если IS_TB = true, SRC открывается в текстовом режиме UNICODE, а DST - в бинарном режиме; иначе - наоборот." << std::endl <<
-        L"MainApp cpWinAux SRC DST - копирование файла SRC в файл DST, с использованием вспомогательной функции winapi." << std::endl;
+        L"MainApp cpWinAux SRC DST - копирование файла SRC в файл DST, с использованием вспомогательной функции winapi." << std::endl <<
+        L"MainApp printStrs PATH STR1 STR2 STR3 - вывод нескольких строк STR, в файл или на консоль PATH." << std::endl <<
+        L"MainApp prompt PROMPT IS_NEED_ECHO - выводит запрос PROMPT, считывает и выводит ответ пользователя с эхом ввода или без." << std::endl;
 }
 
 int wmain(DWORD argc, PCWSTR argv[])
@@ -54,7 +60,13 @@ int wmain(DWORD argc, PCWSTR argv[])
         [&argv]() { CopyFileCpp(argv[2], argv[3]); },
         [&argv]() { CopyFileCWin(argv[2], argv[3]); },
         [&argv]() { CopyFileCDiff(argv[2], argv[3], !wcscmp(argv[4], L"true")); },
-        [&argv]() { CopyFileWinAux(argv[2], argv[3]); }
+        [&argv]() { CopyFileWinAux(argv[2], argv[3]); },
+        [&argv]() { HANDLE hFile = CreateFile(argv[2], GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, 0, NULL);
+            PrintStrs(hFile, argv[3], L"\n", argv[4], L"\n", argv[5], L"\n", NULL);
+            CloseHandle(hFile); },
+        [&argv]() { WCHAR wszResponse[16];
+            Prompt(argv[2], 16, wszResponse, !wcscmp(argv[3], L"true"));
+            std::wcout << wszResponse << std::endl << GetLastError() << std::endl; }
     };
 
     static_assert(static_cast<size_t>(CommandCode::__Count) == a_wszCommands.size());
