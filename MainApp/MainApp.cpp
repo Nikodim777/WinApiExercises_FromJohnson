@@ -21,13 +21,14 @@ enum class CommandCode
     CP_WIN_AUX,
     PRINT_STRS,
     PROMPT,
+    CAT,
     __Count
 };
 
 static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { { L"cpTextC", L"cpC", L"cpCpp", L"cpCWin", L"cpCDiff",
-    L"cpWinAux", L"printStrs", L"prompt" }};
+    L"cpWinAux", L"printStrs", L"prompt", L"cat"}};
 static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { { 4, 4, 4, 4, 5, 
-    4, 6, 3 } };
+    4, 6, 3, 2 } };
 
 VOID PrintHelp()
 {
@@ -40,7 +41,9 @@ VOID PrintHelp()
         L"Если IS_TB = true, SRC открывается в текстовом режиме UNICODE, а DST - в бинарном режиме; иначе - наоборот." << std::endl <<
         L"MainApp cpWinAux SRC DST - копирование файла SRC в файл DST, с использованием вспомогательной функции winapi." << std::endl <<
         L"MainApp printStrs PATH STR1 STR2 STR3 - вывод нескольких строк STR, в файл или на консоль PATH." << std::endl <<
-        L"MainApp prompt PROMPT IS_NEED_ECHO - выводит запрос PROMPT, считывает и выводит ответ пользователя с эхом ввода или без." << std::endl;
+        L"MainApp prompt PROMPT IS_NEED_ECHO - выводит запрос PROMPT, считывает и выводит ответ пользователя с эхом ввода или без." << std::endl <<
+        L"MainApp cat [-s] [files...] - выводит содержимое файлов. если указан флаг s - не выводятся сообщения об ошибках," << std::endl <<
+        "если файл уже существует. Если файлов не передано - выводится входной поток." << std::endl;
 }
 
 int wmain(DWORD argc, PCWSTR argv[])
@@ -66,7 +69,10 @@ int wmain(DWORD argc, PCWSTR argv[])
             CloseHandle(hFile); },
         [&argv]() { WCHAR wszResponse[16];
             Prompt(argv[2], 16, wszResponse, !wcscmp(argv[3], L"true"));
-            std::wcout << wszResponse << std::endl << GetLastError() << std::endl; }
+            std::wcout << wszResponse << std::endl << GetLastError() << std::endl; },
+        [&argc, &argv]() { BOOL bSilence = argc > 2 && !wcscmp(argv[2], L"-s");
+            DWORD nFirstFile = 2lu + (bSilence ? 1lu : 0lu);
+            CatFiles(argc - nFirstFile, &argv[nFirstFile], bSilence); }
     };
 
     static_assert(static_cast<size_t>(CommandCode::__Count) == a_wszCommands.size());

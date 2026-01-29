@@ -59,3 +59,23 @@ VOID
 ReportError(PCWSTR wszErrorMsg,
 	DWORD dwExitCode,
 	BOOL isNeedSysMsg);
+
+/* Функция выводит указанный файл в указанный выходной поток,
+	[in] hOut - ручка к выходному потоку;
+	[in] hFile - ручка к файлу;
+	Возвращает успешность выполнения. */
+_Success_(return)
+BOOL
+CatFile(_In_ HANDLE hOut,
+	_In_ HANDLE hFile);
+
+/* Функция выводит файлы в выходной поток,
+	если файлы не переданы, то выводит входной поток.
+	[in] cFiles - количество файлов в переданном массиве строк;
+	[in] a_FilePaths - указатель на массив строк;
+	[in] bSilence - флаг режима тишины (сообщения об ошибках не выводятся);
+	Возвращает успешность выполнения. */
+BOOL
+CatFiles(_In_ SIZE_T cFiles,
+	_In_reads_(cFiles) PCWSTR a_FilePaths[],
+	_In_ BOOL bSilence);

@@ -335,3 +335,74 @@ END:
 		return;
 	}
 }
+
+/* Функция выводит указанный файл в указанный выходной поток,
+	[in] hOut - ручка к выходному потоку;
+	[in] hFile - ручка к файлу;
+	Возвращает успешность выполнения. */
+_Success_(return)
+BOOL
+CatFile(_In_ HANDLE hOut,
+	_In_ HANDLE hFile)
+{
+	DWORD cbRead = 0;
+	DWORD cbWritten = 0;
+	BYTE buffer[MAX_PATH];
+	
+	while (ReadFile(hFile, buffer, MAX_PATH, &cbRead, NULL) && cbRead != 0)
+	{
+		BOOL bResult = WriteFile(hOut, buffer, cbRead, &cbWritten, NULL);
+		if (!bResult || cbRead != cbWritten)
+		{
+			ReportError(L"Ошибка записи в файл", 0, TRUE);
+			return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
+/* Функция выводит файлы в выходной поток, 
+	если файлы не переданы, то выводит входной поток.
+	[in] cFiles - количество файлов в переданном массиве строк;
+	[in] a_FilePaths - указатель на массив строк;
+	[in] bSilence - флаг режима тишины (сообщения об ошибках не выводятся);
+	Возвращает успешность выполнения. */
+BOOL
+CatFiles(_In_ SIZE_T cFiles, 
+	_In_reads_(cFiles) PCWSTR a_FilePaths[], 
+	_In_ BOOL bSilence)
+{
+	BOOL bResult = TRUE;
+	HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+
+	if (hStdIn == INVALID_HANDLE_VALUE || hStdIn == NULL ||
+		hStdOut == INVALID_HANDLE_VALUE || hStdOut == NULL)
+	{
+		ReportError(L"Не удалось получить один из дескрипторов", 0, TRUE);
+		return FALSE;
+	}
+
+	if (cFiles == 0)
+	{
+		bResult &= CatFile(hStdOut, hStdIn);
+	}
+
+	for (SIZE_T i = 0; i < cFiles; i++)
+	{
+		hFile = CreateFile(a_FilePaths[i], FILE_READ_ACCESS, 0, NULL, OPEN_EXISTING, 0, NULL);
+		if (hFile == INVALID_HANDLE_VALUE)
+		{
+			if(!bSilence)
+				ReportError(L"Не удалось открыть файл", 0, TRUE);
+			continue;
+		}
+
+		bResult &= CatFile(hStdOut, hFile);
+		CloseHandle(hFile);
+	}
+
+	return bResult;
+}
