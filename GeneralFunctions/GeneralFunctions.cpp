@@ -246,15 +246,11 @@ PrintStrs(_In_ HANDLE hOut, ...)
 	BOOL bResult = TRUE;
 
 	va_start(args, hOut);
-	while ((wszArg = va_arg(args, PCWSTR)))
+	while (bResult && (wszArg = va_arg(args, PCWSTR)))
 	{
 		cwArg = wcslen(wszArg);
 		bResult = WriteConsole(hOut, wszArg, cwArg, &cWritten, NULL) 
 			|| WriteFile(hOut, wszArg, cwArg * sizeof(WCHAR), &cWritten, NULL);
-		if (!bResult)
-		{
-			break;
-		}
 	}
 	va_end(args);
 	return bResult;
@@ -275,7 +271,7 @@ Prompt(_In_ PCWSTR wszPrompt,
 {
 	HANDLE hConsoleIn = INVALID_HANDLE_VALUE;
 	HANDLE hConsoleOut = INVALID_HANDLE_VALUE;
-	DWORD cwWritten = 0;
+	DWORD cwRead = 0;
 	DWORD dwConsoleInMode = 0;
 	BOOL bResult = FALSE;
 
@@ -294,8 +290,8 @@ Prompt(_In_ PCWSTR wszPrompt,
 	bResult = GetConsoleMode(hConsoleIn, &dwConsoleInMode) 
 		&& SetConsoleMode(hConsoleIn, (dwConsoleInMode & ~ENABLE_ECHO_INPUT) | (bIsNeedEcho ? ENABLE_ECHO_INPUT : 0))
 		&& PrintStrs(hConsoleOut, wszPrompt, L":\n", NULL)
-		&& ReadConsole(hConsoleIn, wszResponse, cwResponse, &cwWritten, NULL);
-	wszResponse[cwWritten - 2] = '\0';
+		&& ReadConsole(hConsoleIn, wszResponse, cwResponse, &cwRead, NULL);
+	wszResponse[cwRead - 2] = '\0';
 
 	CloseHandle(hConsoleOut);
 	CloseHandle(hConsoleIn);
