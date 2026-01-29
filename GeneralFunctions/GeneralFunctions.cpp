@@ -467,3 +467,15 @@ AnsiToUnicode(_In_ PCWSTR wszSrcFile,
 	CloseHandle(hDstFile);
 	CloseHandle(hSrcFile);
 }
+
+VOID
+PrintCurrentDir()
+{
+	DWORD dwResult = 0;
+	WCHAR wchDir[MAX_PATH];
+	
+	dwResult = GetCurrentDirectory(MAX_PATH, wchDir);
+	(dwResult == 0 || dwResult >= MAX_PATH) ?
+		ReportError(L"Произошла ошибка", 0, TRUE) :
+		ReportError(wchDir, 0, FALSE);
+}

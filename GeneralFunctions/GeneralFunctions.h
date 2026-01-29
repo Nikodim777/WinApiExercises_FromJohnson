@@ -93,3 +93,6 @@ VOID
 AnsiToUnicode(_In_ PCWSTR wszSrcFile,
 	_In_ PCWSTR wszDstFile,
 	_In_ BOOL bRewrite);
+
+VOID
+PrintCurrentDir();
