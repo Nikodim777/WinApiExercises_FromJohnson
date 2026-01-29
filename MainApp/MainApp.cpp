@@ -22,13 +22,14 @@ enum class CommandCode
     PRINT_STRS,
     PROMPT,
     CAT,
+    ANSII2UNICODE,
     __Count
 };
 
 static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { { L"cpTextC", L"cpC", L"cpCpp", L"cpCWin", L"cpCDiff",
-    L"cpWinAux", L"printStrs", L"prompt", L"cat"}};
+    L"cpWinAux", L"printStrs", L"prompt", L"cat", L"a2u"}};
 static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { { 4, 4, 4, 4, 5, 
-    4, 6, 3, 2 } };
+    4, 6, 3, 2, 5 } };
 
 VOID PrintHelp()
 {
@@ -43,7 +44,10 @@ VOID PrintHelp()
         L"MainApp printStrs PATH STR1 STR2 STR3 - вывод нескольких строк STR, в файл или на консоль PATH." << std::endl <<
         L"MainApp prompt PROMPT IS_NEED_ECHO - выводит запрос PROMPT, считывает и выводит ответ пользователя с эхом ввода или без." << std::endl <<
         L"MainApp cat [-s] [files...] - выводит содержимое файлов. если указан флаг s - не выводятся сообщения об ошибках," << std::endl <<
-        "если файл уже существует. Если файлов не передано - выводится входной поток." << std::endl;
+        L"если файл уже существует. Если файлов не передано - выводится входной поток." << std::endl <<
+        L"MainApp a2u SRC DST IS_RW - преобразование ASCII файла SRC в UNICODE файл DST." << std::endl <<
+        L"Если IS_RW = true и DST уже существует, - DST перезаписыватся, иначе выводится вопрос о перезаписи." << std::endl <<
+        L"Работает только с базовыми ASCII символами." << std::endl;
 }
 
 int wmain(DWORD argc, PCWSTR argv[])
@@ -72,7 +76,8 @@ int wmain(DWORD argc, PCWSTR argv[])
             std::wcout << wszResponse << std::endl << GetLastError() << std::endl; },
         [&argc, &argv]() { BOOL bSilence = argc > 2 && !wcscmp(argv[2], L"-s");
             DWORD nFirstFile = 2lu + (bSilence ? 1lu : 0lu);
-            CatFiles(argc - nFirstFile, &argv[nFirstFile], bSilence); }
+            CatFiles(argc - nFirstFile, &argv[nFirstFile], bSilence); },
+        [&argv]() { AnsiToUnicode(argv[2], argv[3], !wcscmp(argv[4], L"true")); }
     };
 
     static_assert(static_cast<size_t>(CommandCode::__Count) == a_wszCommands.size());

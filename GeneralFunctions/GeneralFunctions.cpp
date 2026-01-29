@@ -408,3 +408,66 @@ CatFiles(_In_ SIZE_T cFiles,
 
 	return bResult;
 }
+
+/* Функция преобразует исходный ASCII файл в Unicode, и сохраняет в файл назначения.
+	Работает только с базовыми ASCII символами.
+	[in] wszSrcFile - путь к исходному файлу;
+	[in] wszDstFile - путь к файлу назначения;
+	[in] bRewrite - флаг форсированой перезаписи,если файл назначения уже существует;
+	Ничего не возвращает.
+*/
+VOID
+AnsiToUnicode(_In_ PCWSTR wszSrcFile, 
+	_In_ PCWSTR wszDstFile, 
+	_In_ BOOL bRewrite)
+{
+	HANDLE hSrcFile = INVALID_HANDLE_VALUE;
+	HANDLE hDstFile = INVALID_HANDLE_VALUE;
+	DWORD cbRead = 0;
+	DWORD cbWritten = 0;
+	DWORD dwDstAttr = GetFileAttributes(wszDstFile);
+	CHAR chBuffer[MAX_PATH] = { 0 };
+	WCHAR wchBuffer[MAX_PATH] = { 0 };
+
+	if (dwDstAttr != INVALID_FILE_ATTRIBUTES && !bRewrite)
+	{
+		WCHAR wszResponse[MAX_PATH] = { 0 };
+		Prompt(L"Файл уже существует! Если хотите перезаписать введите yes", MAX_PATH, wszResponse, TRUE);
+		if (wcscmp(wszResponse, L"yes"))
+		{
+			return;
+		}
+	}
+
+	hSrcFile = CreateFile(wszSrcFile, FILE_READ_ACCESS, 0, NULL, OPEN_EXISTING, 0, NULL);
+	if (hSrcFile == INVALID_HANDLE_VALUE)
+	{
+		ReportError(L"Не удалось открыть исходный файл", 0, TRUE);
+		return;
+	}
+	hDstFile = CreateFile(wszDstFile, FILE_WRITE_ACCESS, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hDstFile == INVALID_HANDLE_VALUE)
+	{
+		ReportError(L"Не удалось создать файл", 0, TRUE);
+		CloseHandle(hSrcFile);
+		return;
+	}
+
+	BOOL bResult = TRUE;
+	WCHAR wchBOM = { L'\uFEFF' };
+	bResult = WriteFile(hDstFile, &wchBOM, sizeof(WCHAR), &cbWritten, NULL);
+	while (bResult && (bResult = ReadFile(hSrcFile, chBuffer, MAX_PATH, &cbRead, NULL)) && cbRead > 0)
+	{
+		for (DWORD i = 0; i < cbRead; i++)
+		{
+			wchBuffer[i] = (WCHAR)chBuffer[i];
+		}
+		bResult = WriteFile(hDstFile, wchBuffer, cbRead * sizeof(WCHAR), &cbWritten, NULL);
+	}
+
+	bResult ?
+		ReportError(L"Преобразование успешно завершено", 0, FALSE) :
+		ReportError(L"Неустранимая ошибка чтения/записи", 0, TRUE);
+	CloseHandle(hDstFile);
+	CloseHandle(hSrcFile);
+}

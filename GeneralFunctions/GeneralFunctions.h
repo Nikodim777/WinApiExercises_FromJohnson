@@ -81,3 +81,15 @@ BOOL
 CatFiles(_In_ SIZE_T cFiles,
 	_In_reads_(cFiles) PCWSTR a_FilePaths[],
 	_In_ BOOL bSilence);
+
+/* Функция преобразует исходный ASCII файл в Unicode, и сохраняет в файл назначения.
+	Работает только с базовыми ASCII символами.
+	[in] wszSrcFile - путь к исходному файлу;
+	[in] wszDstFile - путь к файлу назначения;
+	[in] bRewrite - флаг форсированой перезаписи,если файл назначения уже существует;
+	Ничего не возвращает.
+*/
+VOID
+AnsiToUnicode(_In_ PCWSTR wszSrcFile,
+	_In_ PCWSTR wszDstFile,
+	_In_ BOOL bRewrite);
