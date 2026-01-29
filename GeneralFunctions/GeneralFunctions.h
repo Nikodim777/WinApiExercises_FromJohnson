@@ -27,12 +27,13 @@ VOID
 CopyFileWinAux(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath);
 
 // Функция выводит в консоль или файл hOut переданные в аргументах строки.
+_Success_(return)
 BOOL
 PrintStrs(_In_ HANDLE hOut, ...);
 
 // Функция выводит в консоль или файл hOut переданное сообщение.
 inline BOOL
-PrintMsg(_In_ HANDLE hOut, PCWSTR wszMsg)
+PrintMsg(_In_ HANDLE hOut, _In_ PCWSTR wszMsg)
 {
 	return PrintStrs(hOut, wszMsg, NULL);
 }
@@ -48,7 +49,7 @@ BOOL
 Prompt(_In_ PCWSTR wszPrompt,
 	_In_ DWORD cwResponse,
 	_Out_writes_(cwResponse) PWSTR wszResponse,
-	BOOL bIsNeedEcho);
+	_In_ BOOL bIsNeedEcho);
 
 /* Функция выводит сообщение об ошибке.
 	[in] wszErrorMsg - пользовательское сообщение об ошибке;
@@ -56,9 +57,9 @@ Prompt(_In_ PCWSTR wszPrompt,
 	[in] isNeedSysMsg - флаг необходимости получения системного сообщения;
 	Ничего не возвращает. */
 VOID
-ReportError(PCWSTR wszErrorMsg,
-	DWORD dwExitCode,
-	BOOL isNeedSysMsg);
+ReportError(_In_ PCWSTR wszErrorMsg,
+	_In_ DWORD dwExitCode,
+	_In_ BOOL isNeedSysMsg);
 
 /* Функция выводит указанный файл в указанный выходной поток,
 	[in] hOut - ручка к выходному потоку;
@@ -75,6 +76,7 @@ CatFile(_In_ HANDLE hOut,
 	[in] a_FilePaths - указатель на массив строк;
 	[in] bSilence - флаг режима тишины (сообщения об ошибках не выводятся);
 	Возвращает успешность выполнения. */
+_Success_(return)
 BOOL
 CatFiles(_In_ SIZE_T cFiles,
 	_In_reads_(cFiles) PCWSTR a_FilePaths[],
