@@ -29,7 +29,7 @@ enum class CommandCode
 
 static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { { L"cpTextC", L"cpC", L"cpCpp", L"cpCWin", L"cpCDiff",
     L"cpWinAux", L"printStrs", L"prompt", L"cat", L"a2u", L"pwd"}};
-static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { { 4, 4, 4, 4, 5, 
+static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { { 4, 4, 4, 5, 5, 
     4, 6, 3, 2, 5, 2 } };
 
 VOID PrintHelp()
@@ -67,7 +67,9 @@ int wmain(DWORD argc, PCWSTR argv[])
         [&argv]() { CopyTextFileC(argv[2], argv[3]); },
         [&argv]() { CopyFileC(argv[2], argv[3]); },
         [&argv]() { CopyFileCpp(argv[2], argv[3]); },
-        [&argv]() { CopyFileCWin(argv[2], argv[3]); },
+        [&argv]() { DWORD dwFlags = 0;
+            if (!wcscmp(argv[4], L"seq")) dwFlags |= FILE_FLAG_SEQUENTIAL_SCAN;
+            CopyFileCWin(argv[2], argv[3], dwFlags); },
         [&argv]() { CopyFileCDiff(argv[2], argv[3], !wcscmp(argv[4], L"true")); },
         [&argv]() { CopyFileWinAux(argv[2], argv[3]); },
         [&argv]() { HANDLE hFile = CreateFile(argv[2], GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, 0, NULL);

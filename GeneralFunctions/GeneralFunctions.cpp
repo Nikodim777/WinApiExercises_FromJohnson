@@ -134,19 +134,19 @@ CopyFileCpp(_In_ const std::wstring& srcPath, _In_ const std::wstring& dstPath)
 
 // Функция копирования файлов. Реализация на С использованием winapi.
 VOID
-CopyFileCWin(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath)
+CopyFileCWin(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath, _In_ DWORD dwFlags)
 {
 	HANDLE hSrcFile = INVALID_HANDLE_VALUE;
 	HANDLE hDstFile = INVALID_HANDLE_VALUE;
 
 	wprintf(L"Открытие файлов %s и %s\n", wszSrcPath, wszDstPath);
-	hSrcFile = CreateFile(wszSrcPath, FILE_READ_ACCESS, 0, NULL, OPEN_EXISTING, 0, NULL);
+	hSrcFile = CreateFile(wszSrcPath, FILE_READ_ACCESS, 0, NULL, OPEN_EXISTING, dwFlags, NULL);
 	if (hSrcFile == INVALID_HANDLE_VALUE)
 	{
 		wprintf(L"Ошибка при открытии файла. Код ошибки - %lu.", GetLastError());
 		return;
 	}
-	hDstFile = CreateFile(wszDstPath, FILE_WRITE_ACCESS, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	hDstFile = CreateFile(wszDstPath, FILE_WRITE_ACCESS, 0, NULL, CREATE_ALWAYS, dwFlags | FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDstFile == INVALID_HANDLE_VALUE)
 	{
 		wprintf(L"Ошибка при создании файла. Код ошибки - %lu.", GetLastError());
