@@ -318,15 +318,15 @@ ReportError(_In_ PCWSTR wszErrorMsg,
 	HANDLE hStdError = GetStdHandle(STD_ERROR_HANDLE);
 
 	PrintMsg(hStdError, wszErrorMsg);
-	if (!isNeedSysMsg)
-		goto END;
-
-	cwSysMsg = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dwError, 0, (LPWSTR)&wszSysMsg, 0, NULL);
-	PrintStrs(hStdError, L": ", wszSysMsg, NULL);
-	LocalFree(wszSysMsg);
-
-END:
+	if (isNeedSysMsg)
+	{
+		cwSysMsg = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dwError, 0, (LPWSTR)&wszSysMsg, 0, NULL);
+		wszSysMsg[cwSysMsg - 3] = L'\0'; // Удаляем перенос строки.
+		PrintStrs(hStdError, L": ", wszSysMsg, NULL);
+		LocalFree(wszSysMsg);
+	}
 	PrintMsg(hStdError, L"!\n");
+
 	if (dwExitCode > 0)
 	{
 		ExitProcess(dwExitCode);
