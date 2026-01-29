@@ -342,21 +342,33 @@ BOOL
 CatFile(_In_ HANDLE hOut,
 	_In_ HANDLE hFile)
 {
-	DWORD cbRead = 0;
-	DWORD cbWritten = 0;
+	BOOL bResult = TRUE;
+	DWORD cRead = 0;
+	DWORD cWritten = 0;
 	BYTE buffer[MAX_PATH];
 	
-	while (ReadFile(hFile, buffer, MAX_PATH, &cbRead, NULL) && cbRead != 0)
+	while (TRUE)
 	{
-		BOOL bResult = WriteFile(hOut, buffer, cbRead, &cbWritten, NULL);
-		if (!bResult || cbRead != cbWritten)
+		BOOL bConsoleIn = bResult = ReadConsole(hFile, buffer, MAX_PATH / 2, &cRead, NULL);
+		if (!bConsoleIn)
+			bResult = ReadFile(hFile, buffer, MAX_PATH, &cRead, NULL);
+		if (!bResult)
+		{
+			ReportError(L"Ошибка чтения из файла", 0, TRUE);
+			return FALSE;
+		}
+
+		if (cRead == 0)
+			return TRUE;
+
+		bResult = WriteConsole(hOut, buffer, bConsoleIn ? cRead : cRead / 2, &cWritten, NULL) 
+			|| WriteFile(hOut, buffer, bConsoleIn ? cRead * sizeof(WCHAR) : cRead, &cWritten, NULL);
+		if (!bResult)
 		{
 			ReportError(L"Ошибка записи в файл", 0, TRUE);
 			return FALSE;
 		}
 	}
-
-	return TRUE;
 }
 
 /* Функция выводит файлы в выходной поток, 
