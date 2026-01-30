@@ -491,3 +491,44 @@ PrintCurrentDir()
 		ReportError(L"Произошла ошибка", 0, TRUE) :
 		ReportError(wchDir, 0, FALSE);
 }
+
+/* Функция в аргументах cmd ищет флаги указанные в wszOptions,
+	и заполняет соответствующие флаги, переданные как PBOOL.
+	[in] argc - число аргументов cmd;
+	[in] argv - аргументы cmd;
+	[in] wszOptions - список флагов-символов с нулём на конце;
+	[in] ... - указатели на BOOL, их число должно соответствовать числу флагов в wszOptions;
+	Возвращает номер первого аргумента - не флага. */
+DWORD
+GetOptions(_In_ DWORD argc,
+	_In_ PCWSTR argv[],
+	_In_ PCWSTR wszOptions,
+	_Out_ ...)
+{
+	va_list args;
+	WCHAR wsFlag[2] = { L'-', L'-' };
+
+	va_start(args, wszOptions);
+	for (DWORD dwFlag = 0; wszOptions[dwFlag] != L'\0'; dwFlag++)
+	{
+		wsFlag[1] = wszOptions[dwFlag];
+		PBOOL pbFlag = va_arg(args, PBOOL);
+		if (pbFlag == NULL)
+			continue;
+		*pbFlag = FALSE;
+
+		for (DWORD dwArg = 1; !(*pbFlag) && dwArg < argc; dwArg++)
+		{
+			if (memcmp(argv[dwArg], wsFlag, sizeof(wsFlag)))
+				continue;
+			
+			*pbFlag = TRUE;
+		}
+	}
+	va_end(args);
+
+	// Определяем первый аргумент - не флаг.
+	DWORD dwArg = 1;
+	for (; dwArg < argc && argv[dwArg][0] == L'-'; dwArg++);
+	return dwArg;
+}

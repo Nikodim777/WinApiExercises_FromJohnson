@@ -24,13 +24,14 @@ enum class CommandCode
     CAT,
     ANSII2UNICODE,
     PWD,
+    OPTIONS,
     __Count
 };
 
 static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { { L"cpTextC", L"cpC", L"cpCpp", L"cpCWin", L"cpCDiff",
-    L"cpWinAux", L"printStrs", L"prompt", L"cat", L"a2u", L"pwd"}};
+    L"cpWinAux", L"printStrs", L"prompt", L"cat", L"a2u", L"pwd", L"opt"}};
 static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { { 4, 4, 4, 5, 5, 
-    4, 6, 3, 2, 5, 2 } };
+    4, 6, 3, 2, 5, 2, 2 } };
 
 VOID PrintHelp()
 {
@@ -49,7 +50,8 @@ VOID PrintHelp()
         L"MainApp a2u SRC DST IS_RW - преобразование ASCII файла SRC в UNICODE файл DST." << std::endl <<
         L"Если IS_RW = true и DST уже существует, - DST перезаписыватся, иначе выводится вопрос о перезаписи." << std::endl <<
         L"Работает только с базовыми ASCII символами." << std::endl <<
-        L"MainApp pwd - вывод текущей директории." << std::endl;
+        L"MainApp pwd - вывод текущей директории." << std::endl <<
+        L"MainApp opt [flags] [args]. flags - флаги(-x -t -y); args - любые аргументы без -." << std::endl;
 }
 
 int wmain(DWORD argc, PCWSTR argv[])
@@ -82,7 +84,12 @@ int wmain(DWORD argc, PCWSTR argv[])
             DWORD nFirstFile = 2lu + (bSilence ? 1lu : 0lu);
             CatFiles(argc - nFirstFile, &argv[nFirstFile], bSilence); },
         [&argv]() { AnsiToUnicode(argv[2], argv[3], !wcscmp(argv[4], L"true")); },
-        []() { PrintCurrentDir(); }
+        []() { PrintCurrentDir(); },
+        [&argc, &argv]() {BOOL bX, bT, bY;
+            DWORD dwFirstArg = GetOptions(argc - 1 , &argv[1], L"txy", &bT, &bX, &bY);
+            std::wcout << bX << bT << bY << std::endl;
+            for (DWORD dwIter = dwFirstArg + 1; dwIter < argc; dwIter++) { std::wcout << argv[dwIter]; }
+            std::wcout << std::endl; }
     };
 
     static_assert(static_cast<size_t>(CommandCode::__Count) == a_wszCommands.size());

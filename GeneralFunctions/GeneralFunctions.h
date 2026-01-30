@@ -96,3 +96,16 @@ AnsiToUnicode(_In_ PCWSTR wszSrcFile,
 
 VOID
 PrintCurrentDir();
+
+/* Функция в аргументах cmd ищет флаги указанные в wszOptions,
+	и заполняет соответствующие флаги, переданные как PBOOL.
+	[in] argc - число аргументов cmd;
+	[in] argv - аргументы cmd;
+	[in] wszOptions - список флагов-символов с нулём на конце;
+	[in] ... - указатели на BOOL, их число должно соответствовать числу флагов в wszOptions;
+	Возвращает номер первого аргумента - не флага. */
+DWORD
+GetOptions(_In_ DWORD argc,
+	_In_ PCWSTR argv[],
+	_In_ PCWSTR wszOptions,
+	_Out_ ...);
