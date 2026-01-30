@@ -52,14 +52,16 @@ Prompt(_In_ PCWSTR wszPrompt,
 	_In_ BOOL bIsNeedEcho);
 
 /* Функция выводит сообщение об ошибке.
-	[in] wszErrorMsg - пользовательское сообщение об ошибке;
+	[in] wszErrorMsg - пользовательское сообщение об ошибке в виде форматной строки;
 	[in] dwExitCode - код завершение процесса, если не 0 - процесс завершается;
 	[in] isNeedSysMsg - флаг необходимости получения системного сообщения;
+	[in] ... - аргументы форматной строки;
 	Ничего не возвращает. */
 VOID
-ReportError(_In_ PCWSTR wszErrorMsg,
+ReportError(_In_ PCWSTR wszFormatMsg,
 	_In_ DWORD dwExitCode,
-	_In_ BOOL isNeedSysMsg);
+	_In_ BOOL isNeedSysMsg,
+	_In_ ...);
 
 /* Функция выводит указанный файл в указанный выходной поток,
 	[in] hOut - ручка к выходному потоку;

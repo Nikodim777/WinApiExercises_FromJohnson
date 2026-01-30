@@ -299,19 +299,27 @@ Prompt(_In_ PCWSTR wszPrompt,
 }
 
 /* Функция выводит сообщение об ошибке.
-	[in] wszErrorMsg - пользовательское сообщение об ошибке;
+	[in] wszErrorMsg - пользовательское сообщение об ошибке в виде форматной строки;
 	[in] dwExitCode - код завершение процесса, если не 0 - процесс завершается;
 	[in] isNeedSysMsg - флаг необходимости получения системного сообщения;
+	[in] ... - аргументы форматной строки;
 	Ничего не возвращает. */
 VOID
-ReportError(_In_ PCWSTR wszErrorMsg,
+ReportError(_In_ PCWSTR wszFormatMsg,
 	_In_ DWORD dwExitCode,
-	_In_ BOOL isNeedSysMsg)
+	_In_ BOOL isNeedSysMsg,
+	_In_ ...)
 {
 	DWORD dwError = GetLastError();
 	DWORD cwSysMsg = 0;
 	PWSTR wszSysMsg = NULL;
 	HANDLE hStdError = GetStdHandle(STD_ERROR_HANDLE);
+	WCHAR wszErrorMsg[MAX_PATH] = { 0 };
+
+	va_list args;
+	va_start(args, isNeedSysMsg);
+	vswprintf_s(wszErrorMsg, MAX_PATH, wszFormatMsg, args);
+	va_end(args);
 
 	PrintMsg(hStdError, wszErrorMsg);
 	if (isNeedSysMsg)
@@ -515,7 +523,7 @@ GetOptions(_In_ DWORD argc,
 	for (; dwResult < argc && argv[dwResult][0] == L'-'; dwResult++)
 	{
 		if (bIsStrict && !wcschr(wszOptions, argv[dwResult][1]))
-			ReportError(L"В аргументах передан неразрешённый флаг", 1, FALSE);
+			ReportError(L"В аргументах передан неразрешённый флаг -%c", 1, FALSE, argv[dwResult][1]);
 	}
 
 	va_start(args, bIsStrict);
