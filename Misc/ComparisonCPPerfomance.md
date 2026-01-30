@@ -10,5 +10,7 @@ In my own functions the buffer size is 260 bytes.
 |cpC|The C realization|5400|45950|6 157000|
 |cpCpp|The C++ realization|28600|19 220700|749 424700|
 |cpCWin|The C real. with winapi|16000|280000|11 500000|
+|cpCWinNB|The C real. with winapi without system buffer|22250|240000|97 500000|
 |cpCWin with FLAF_SEQUENTIAL|The C real. with winapi|8250|277000|18 170000|
+|cpCWinNB with FLAF_SEQUENTIAL|The C real. with winapi without system buffer|9400|255000|96 500000|
 |cpWinAux|The winapi CopyFile|7000|10000|150000|
