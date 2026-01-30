@@ -539,3 +539,32 @@ GetOptions(_In_ DWORD argc,
 
 	return dwResult;
 }
+
+/* Функция сортирует переданный массив строк с учётом локали.
+	[in] cStrs - число строк в массиве;
+	[in] strs - массив строк;
+	[in] bEnUS - флаг принудительного использования локали en-US;
+	Ничего не возвращает.
+*/
+VOID
+StringsSort(_In_ INT cStrs, 
+	_In_reads_(cStrs) PCWSTR strs[], 
+	_In_ BOOL bEnUS)
+{
+	_locale_t locale = _create_locale(LC_ALL, "en_US");
+	INT iStr = 1;
+	for (; iStr < cStrs; iStr++)
+	{
+		INT iPlace = iStr;
+		for (; iPlace > 0 && 
+			(bEnUS ? 
+				_wcsicmp_l(strs[iPlace - 1], strs[iPlace], locale) : 
+				wcscmp(strs[iPlace - 1], strs[iPlace])) > 0; 
+			iPlace--)
+		{
+			PCWSTR wszTmp = strs[iPlace - 1];
+			strs[iPlace - 1] = strs[iPlace];
+			strs[iPlace] = wszTmp;
+		}
+	}
+}

@@ -112,3 +112,14 @@ GetOptions(_In_ DWORD argc,
 	_In_ PCWSTR wszOptions,
 	_In_ BOOL bIsStrict,
 	_Out_ ...);
+
+/* Функция сортирует переданный массив строк с учётом локали.
+	[in] cStrs - число строк в массиве;
+	[in] strs - массив строк;
+	[in] bEnUS - флаг принудительного использования локали en-US;
+	Ничего не возвращает.
+*/
+VOID
+StringsSort(_In_ INT cStrs,
+	_In_reads_(cStrs) PCWSTR strs[],
+	_In_ BOOL bEnUS);
