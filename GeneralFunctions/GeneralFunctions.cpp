@@ -497,18 +497,28 @@ PrintCurrentDir()
 	[in] argc - число аргументов cmd;
 	[in] argv - аргументы cmd;
 	[in] wszOptions - список флагов-символов с нулём на конце;
+	[in] bIsStrict - флаг выведения сообщения об ошибке, 
+	если в аргументах есть флаги не указанные в wszOptions;
 	[in] ... - указатели на BOOL, их число должно соответствовать числу флагов в wszOptions;
 	Возвращает номер первого аргумента - не флага. */
 DWORD
 GetOptions(_In_ DWORD argc,
 	_In_ PCWSTR argv[],
 	_In_ PCWSTR wszOptions,
+	_In_ BOOL bIsStrict,
 	_Out_ ...)
 {
 	va_list args;
 	WCHAR wsFlag[2] = { L'-', L'-' };
 
-	va_start(args, wszOptions);
+	DWORD dwResult = 1;
+	for (; dwResult < argc && argv[dwResult][0] == L'-'; dwResult++)
+	{
+		if (bIsStrict && !wcschr(wszOptions, argv[dwResult][1]))
+			ReportError(L"В аргументах передан неразрешённый флаг", 1, FALSE);
+	}
+
+	va_start(args, bIsStrict);
 	for (DWORD dwFlag = 0; wszOptions[dwFlag] != L'\0'; dwFlag++)
 	{
 		wsFlag[1] = wszOptions[dwFlag];
@@ -527,8 +537,5 @@ GetOptions(_In_ DWORD argc,
 	}
 	va_end(args);
 
-	// Определяем первый аргумент - не флаг.
-	DWORD dwArg = 1;
-	for (; dwArg < argc && argv[dwArg][0] == L'-'; dwArg++);
-	return dwArg;
+	return dwResult;
 }

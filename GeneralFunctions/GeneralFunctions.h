@@ -102,10 +102,13 @@ PrintCurrentDir();
 	[in] argc - число аргументов cmd;
 	[in] argv - аргументы cmd;
 	[in] wszOptions - список флагов-символов с нулём на конце;
+	[in] bIsStrict - флаг выведения сообщения об ошибке,
+	если в аргументах есть флаги не указанные в wszOptions;
 	[in] ... - указатели на BOOL, их число должно соответствовать числу флагов в wszOptions;
 	Возвращает номер первого аргумента - не флага. */
 DWORD
 GetOptions(_In_ DWORD argc,
 	_In_ PCWSTR argv[],
 	_In_ PCWSTR wszOptions,
+	_In_ BOOL bIsStrict,
 	_Out_ ...);

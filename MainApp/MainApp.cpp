@@ -86,7 +86,7 @@ int wmain(DWORD argc, PCWSTR argv[])
         [&argv]() { AnsiToUnicode(argv[2], argv[3], !wcscmp(argv[4], L"true")); },
         []() { PrintCurrentDir(); },
         [&argc, &argv]() {BOOL bX, bT, bY;
-            DWORD dwFirstArg = GetOptions(argc - 1 , &argv[1], L"txy", &bT, &bX, &bY);
+            DWORD dwFirstArg = GetOptions(argc - 1 , &argv[1], L"txy", TRUE, &bT, &bX, &bY);
             std::wcout << bX << bT << bY << std::endl;
             for (DWORD dwIter = dwFirstArg + 1; dwIter < argc; dwIter++) { std::wcout << argv[dwIter]; }
             std::wcout << std::endl; }
