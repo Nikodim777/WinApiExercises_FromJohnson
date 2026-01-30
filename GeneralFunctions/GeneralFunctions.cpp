@@ -175,6 +175,58 @@ CopyFileCWin(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath, _In_ DWORD dwFlags)
 	return;
 }
 
+// Функция копирования файлов. Реализация на С использованием winapi без системного буфера.
+// Размер сектора определяется для тома конечного файла. Тома должны быть одинаковы.
+VOID
+CopyFileCWinNoBuf(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath, _In_ DWORD dwFlags)
+{
+	HANDLE hSrcFile = INVALID_HANDLE_VALUE;
+	HANDLE hDstFile = INVALID_HANDLE_VALUE;
+
+	wprintf(L"Открытие файлов %s и %s\n", wszSrcPath, wszDstPath);
+	hSrcFile = CreateFile(wszSrcPath, FILE_READ_ACCESS, 0, NULL, OPEN_EXISTING, dwFlags | FILE_FLAG_NO_BUFFERING, NULL);
+	if (hSrcFile == INVALID_HANDLE_VALUE)
+	{
+		wprintf(L"Ошибка при открытии файла. Код ошибки - %lu.", GetLastError());
+		return;
+	}
+	hDstFile = CreateFile(wszDstPath, FILE_WRITE_ACCESS, 0, NULL, CREATE_ALWAYS, dwFlags | FILE_FLAG_NO_BUFFERING | FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hDstFile == INVALID_HANDLE_VALUE)
+	{
+		wprintf(L"Ошибка при создании файла. Код ошибки - %lu.", GetLastError());
+		CloseHandle(hDstFile);
+		return;
+	}
+
+	WCHAR wszDrive[16] = { 0 };
+	GetVolumePathName(wszDstPath, wszDrive, 16);
+	DISK_SPACE_INFORMATION diskInfo = { 0 };
+	HRESULT hRes = GetDiskSpaceInformation(wszDrive, &diskInfo);
+	if (hRes != S_OK)
+		ReportErrorAndExit(L"Не удалось получить размер сектор диска", 1, TRUE);
+
+	BOOL bResult = FALSE;
+	DWORD cbRead = 0;
+	DWORD cbWritten = 0;
+	DWORD cbBuffer = diskInfo.BytesPerSector * 2;
+	PBYTE pBuffer = (PBYTE)VirtualAlloc(NULL, cbBuffer, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE );
+	wprintf(L"Копирование файла %s в %s\n", wszSrcPath, wszDstPath);
+	while ((bResult = ReadFile(hSrcFile, pBuffer, cbBuffer, &cbRead, NULL)) && cbRead > 0)
+	{
+		bResult = WriteFile(hDstFile, pBuffer, cbBuffer, &cbWritten, NULL);
+		if (!bResult || cbRead != cbWritten)
+		{
+			break;
+		}
+	}
+	bResult ?
+		wprintf(L"Копирование файла %s в %s завершено!\n", wszSrcPath, wszDstPath) :
+		wprintf(L"Неустранимая ошибка чтения/записи. Код ошибки - %lu.", GetLastError());
+	CloseHandle(hSrcFile);
+	CloseHandle(hDstFile);
+	return;
+}
+
 // Функция копирования текстовых файлов в разных режимах. Реализация на чистом С.
 // [in] isTb - если true, файл-источник открывается 
 // как текстовый, а целевой файл - как бинарный, иначе - наоборот. 

@@ -16,6 +16,11 @@ CopyFileCpp(_In_ const std::wstring& srcPath, _In_ const std::wstring& dstPath);
 VOID
 CopyFileCWin(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath, _In_ DWORD dwFlags);
 
+// Функция копирования файлов. Реализация на С использованием winapi без системного буфера.
+// Размер сектора определяется для тома конечного файла. Тома должны быть одинаковы.
+VOID
+CopyFileCWinNoBuf(_In_ PCWSTR wszSrcPath, _In_ PCWSTR wszDstPath, _In_ DWORD dwFlags);
+
 // Функция копирования текстовых файлов в разных режимах. Реализация на чистом С.
 // [in] isTb - если true, файл-источник открывается 
 // как текстовый, а целевой файл - как бинарный, иначе - наоборот. 

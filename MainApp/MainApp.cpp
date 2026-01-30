@@ -17,6 +17,7 @@ enum class CommandCode
     CP_C,
     CP_CPP,
     CP_C_WIN,
+    CP_C_WIN_NO_BUF,
     CP_C_DIFF,
     CP_WIN_AUX,
     PRINT_STRS,
@@ -29,9 +30,9 @@ enum class CommandCode
     __Count
 };
 
-static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { { L"cpTextC", L"cpC", L"cpCpp", L"cpCWin", L"cpCDiff",
+static constexpr std::array<PCWSTR, static_cast<int>(CommandCode::__Count)> a_wszCommands = { { L"cpTextC", L"cpC", L"cpCpp", L"cpCWin", L"cpCWinNB", L"cpCDiff",
     L"cpWinAux", L"printStrs", L"prompt", L"cat", L"a2u", L"pwd", L"opt", L"sort"}};
-static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { { 4, 4, 4, 5, 5, 
+static constexpr std::array<size_t, static_cast<int>(CommandCode::__Count)> a_cArgs = { { 4, 4, 4, 5, 5, 5, 
     4, 6, 3, 2, 5, 2, 2, 3 } };
 
 VOID PrintHelp()
@@ -41,6 +42,8 @@ VOID PrintHelp()
         L"MainApp cpC SRC DST - копирование файла SRC в файл DST, реализация на с." << std::endl <<
         L"MainApp cpCpp SRC DST - копирование файла SRC в файл DST, реализация на с++." << std::endl <<
         L"MainApp cpCWin SRC DST - копирование файла SRC в файл DST, реализация на с с использованием winapi." << std::endl <<
+        L"MainApp cpCWin SRC DST - копирование файла SRC в файл DST, реализация на с с использованием winapi без системного буфера." << std::endl <<
+        L"Тома SRC и DST должны быть одинаковы, размер сектора определяется по файлу DST." << std::endl <<
         L"MainApp cpCDiff SRC DST IS_TB - копирование файла SRC в файл DST в разных режимах, реализация на с." << std::endl <<
         L"Если IS_TB = true, SRC открывается в текстовом режиме UNICODE, а DST - в бинарном режиме; иначе - наоборот." << std::endl <<
         L"MainApp cpWinAux SRC DST - копирование файла SRC в файл DST, с использованием вспомогательной функции winapi." << std::endl <<
@@ -74,6 +77,9 @@ int wmain(DWORD argc, PCWSTR argv[])
         [&argv]() { DWORD dwFlags = 0;
             if (!wcscmp(argv[4], L"seq")) dwFlags |= FILE_FLAG_SEQUENTIAL_SCAN;
             CopyFileCWin(argv[2], argv[3], dwFlags); },
+        [&argv]() { DWORD dwFlags = 0;
+            if (!wcscmp(argv[4], L"seq")) dwFlags |= FILE_FLAG_SEQUENTIAL_SCAN;
+            CopyFileCWinNoBuf(argv[2], argv[3], dwFlags); },
         [&argv]() { CopyFileCDiff(argv[2], argv[3], !wcscmp(argv[4], L"true")); },
         [&argv]() { CopyFileWinAux(argv[2], argv[3]); },
         [&argv]() { HANDLE hFile = CreateFile(argv[2], GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, 0, NULL);
