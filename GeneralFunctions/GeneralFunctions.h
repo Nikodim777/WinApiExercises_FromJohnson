@@ -51,17 +51,24 @@ Prompt(_In_ PCWSTR wszPrompt,
 	_Out_writes_(cwResponse) PWSTR wszResponse,
 	_In_ BOOL bIsNeedEcho);
 
-/* Функция выводит сообщение об ошибке.
-	[in] wszErrorMsg - пользовательское сообщение об ошибке в виде форматной строки;
+/* Функция выводит сообщение.
+	[in] wszMsg - пользовательское сообщение об ошибке в виде форматной строки;
 	[in] dwExitCode - код завершение процесса, если не 0 - процесс завершается;
-	[in] isNeedSysMsg - флаг необходимости получения системного сообщения;
+	[in] isNeedSysMsg - флаг необходимости получения системного сообщения по ошибке;
 	[in] ... - аргументы форматной строки;
 	Ничего не возвращает. */
 VOID
-ReportError(_In_ PCWSTR wszFormatMsg,
+Report(_In_ PCWSTR wszFormatMsg,
 	_In_ DWORD dwExitCode,
 	_In_ BOOL isNeedSysMsg,
 	_In_ ...);
+
+// Функция выводит в консоль форматированное сообщение.
+#define ReportMsg(wszFormatMsg, ...) Report((wszFormatMsg), 0, FALSE, __VA_ARGS__)
+// Функция выводит в консоль форматированное сообщение об ошибке.
+#define ReportError(wszFormatMsg, isNeedSysMsg, ...) Report((wszFormatMsg), 0, (isNeedSysMsg), __VA_ARGS__)
+// Функция выводит в консоль форматированное сообщение об ошибке и завершает процесс с ошибкой dwExitCode.
+#define ReportErrorAndExit(wszFormatMsg, dwExitCode, isNeedSysMsg, ...) Report((wszFormatMsg), (dwExitCode), (isNeedSysMsg), __VA_ARGS__)
 
 /* Функция выводит указанный файл в указанный выходной поток,
 	[in] hOut - ручка к выходному потоку;

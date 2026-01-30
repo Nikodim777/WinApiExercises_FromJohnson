@@ -298,14 +298,14 @@ Prompt(_In_ PCWSTR wszPrompt,
 	return bResult;
 }
 
-/* Функция выводит сообщение об ошибке.
-	[in] wszErrorMsg - пользовательское сообщение об ошибке в виде форматной строки;
+/* Функция выводит сообщение.
+	[in] wszMsg - пользовательское сообщение об ошибке в виде форматной строки;
 	[in] dwExitCode - код завершение процесса, если не 0 - процесс завершается;
-	[in] isNeedSysMsg - флаг необходимости получения системного сообщения;
+	[in] isNeedSysMsg - флаг необходимости получения системного сообщения по ошибке;
 	[in] ... - аргументы форматной строки;
 	Ничего не возвращает. */
 VOID
-ReportError(_In_ PCWSTR wszFormatMsg,
+Report(_In_ PCWSTR wszFormatMsg,
 	_In_ DWORD dwExitCode,
 	_In_ BOOL isNeedSysMsg,
 	_In_ ...)
@@ -313,23 +313,23 @@ ReportError(_In_ PCWSTR wszFormatMsg,
 	DWORD dwError = GetLastError();
 	DWORD cwSysMsg = 0;
 	PWSTR wszSysMsg = NULL;
-	HANDLE hStdError = GetStdHandle(STD_ERROR_HANDLE);
-	WCHAR wszErrorMsg[MAX_PATH] = { 0 };
+	HANDLE hStdOut = GetStdHandle(dwError == ERROR_SUCCESS ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
+	WCHAR wszMsg[MAX_PATH] = { 0 };
 
 	va_list args;
 	va_start(args, isNeedSysMsg);
-	vswprintf_s(wszErrorMsg, MAX_PATH, wszFormatMsg, args);
+	vswprintf_s(wszMsg, MAX_PATH, wszFormatMsg, args);
 	va_end(args);
 
-	PrintMsg(hStdError, wszErrorMsg);
+	PrintMsg(hStdOut, wszMsg);
 	if (isNeedSysMsg)
 	{
 		cwSysMsg = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dwError, 0, (LPWSTR)&wszSysMsg, 0, NULL);
 		wszSysMsg[cwSysMsg - 3] = L'\0'; // Удаляем перенос строки.
-		PrintStrs(hStdError, L": ", wszSysMsg, NULL);
+		PrintStrs(hStdOut, L": ", wszSysMsg, NULL);
 		LocalFree(wszSysMsg);
 	}
-	PrintMsg(hStdError, L"!\n");
+	PrintMsg(hStdOut, (dwError == ERROR_SUCCESS) ? L"\n" : L"!\n");
 
 	if (dwExitCode > 0)
 	{
@@ -362,7 +362,7 @@ CatFile(_In_ HANDLE hOut,
 			bResult = ReadFile(hFile, buffer, MAX_PATH, &cRead, NULL);
 		if (!bResult)
 		{
-			ReportError(L"Ошибка чтения из файла", 0, TRUE);
+			ReportError(L"Ошибка чтения из файла", TRUE);
 			return FALSE;
 		}
 
@@ -373,7 +373,7 @@ CatFile(_In_ HANDLE hOut,
 			|| WriteFile(hOut, buffer, bConsoleIn ? cRead * sizeof(WCHAR) : cRead, &cWritten, NULL);
 		if (!bResult)
 		{
-			ReportError(L"Ошибка записи в файл", 0, TRUE);
+			ReportError(L"Ошибка записи в файл", TRUE);
 			return FALSE;
 		}
 	}
@@ -399,7 +399,7 @@ CatFiles(_In_ SIZE_T cFiles,
 	if (hStdIn == INVALID_HANDLE_VALUE || hStdIn == NULL ||
 		hStdOut == INVALID_HANDLE_VALUE || hStdOut == NULL)
 	{
-		ReportError(L"Не удалось получить один из дескрипторов", 0, TRUE);
+		ReportError(L"Не удалось получить один из дескрипторов", TRUE);
 		return FALSE;
 	}
 
@@ -414,7 +414,7 @@ CatFiles(_In_ SIZE_T cFiles,
 		if (hFile == INVALID_HANDLE_VALUE)
 		{
 			if(!bSilence)
-				ReportError(L"Не удалось открыть файл", 0, TRUE);
+				ReportError(L"Не удалось открыть файл", TRUE);
 			continue;
 		}
 
@@ -458,13 +458,13 @@ AnsiToUnicode(_In_ PCWSTR wszSrcFile,
 	hSrcFile = CreateFile(wszSrcFile, FILE_READ_ACCESS, 0, NULL, OPEN_EXISTING, 0, NULL);
 	if (hSrcFile == INVALID_HANDLE_VALUE)
 	{
-		ReportError(L"Не удалось открыть исходный файл", 0, TRUE);
+		ReportError(L"Не удалось открыть исходный файл", TRUE);
 		return;
 	}
 	hDstFile = CreateFile(wszDstFile, FILE_WRITE_ACCESS, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDstFile == INVALID_HANDLE_VALUE)
 	{
-		ReportError(L"Не удалось создать файл", 0, TRUE);
+		ReportError(L"Не удалось создать файл", TRUE);
 		CloseHandle(hSrcFile);
 		return;
 	}
@@ -482,8 +482,8 @@ AnsiToUnicode(_In_ PCWSTR wszSrcFile,
 	}
 
 	bResult ?
-		ReportError(L"Преобразование успешно завершено", 0, FALSE) :
-		ReportError(L"Неустранимая ошибка чтения/записи", 0, TRUE);
+		ReportMsg(L"Преобразование успешно завершено\n") :
+		ReportError(L"Неустранимая ошибка чтения/записи", TRUE);
 	CloseHandle(hDstFile);
 	CloseHandle(hSrcFile);
 }
@@ -496,8 +496,8 @@ PrintCurrentDir()
 	
 	dwResult = GetCurrentDirectory(MAX_PATH, wchDir);
 	(dwResult == 0 || dwResult >= MAX_PATH) ?
-		ReportError(L"Произошла ошибка", 0, TRUE) :
-		ReportError(wchDir, 0, FALSE);
+		ReportError(L"Произошла ошибка", TRUE) :
+		ReportMsg(wchDir);
 }
 
 /* Функция в аргументах cmd ищет флаги указанные в wszOptions,
@@ -523,7 +523,7 @@ GetOptions(_In_ DWORD argc,
 	for (; dwResult < argc && argv[dwResult][0] == L'-'; dwResult++)
 	{
 		if (bIsStrict && !wcschr(wszOptions, argv[dwResult][1]))
-			ReportError(L"В аргументах передан неразрешённый флаг -%c", 1, FALSE, argv[dwResult][1]);
+			ReportErrorAndExit(L"В аргументах передан неразрешённый флаг -%c", 1, FALSE, argv[dwResult][1]);
 	}
 
 	va_start(args, bIsStrict);
