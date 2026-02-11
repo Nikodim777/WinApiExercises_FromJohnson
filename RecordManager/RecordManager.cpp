@@ -115,15 +115,17 @@ INT wmain(DWORD argc, PCWSTR argv[])
                 sRecord.cRef++;
                 sRecord.tRefTime = tSysTime;
                 bRecordUpdate = TRUE;
+
+                if (wchCommand == L'd')
+                {
+                    sRecord.cRef = 0;
+                    sHeader.cValidRecords--;
+                    bRecordUpdate = TRUE;
+                    bHeaderUpdate = TRUE;
+                    std::wcout << L"Запись " << nRecord << L" успешно удалена!" << std::endl;
+                }
             }
-            if (wchCommand == L'd')
-            {
-                sRecord.cRef = 0;
-                sHeader.cValidRecords--;
-                bRecordUpdate = TRUE;
-                bHeaderUpdate = TRUE;
-                std::wcout << L"Запись " << nRecord << L" успешно удалена!" << std::endl;
-            }
+            std::wcout << L"Число непустых записей: " << sHeader.cValidRecords << std::endl;
         }
         else if (wchCommand == L'w')
         {
@@ -138,6 +140,7 @@ INT wmain(DWORD argc, PCWSTR argv[])
             sRecord.tUpdateTime = tSysTime;
             bRecordUpdate = TRUE;
             std::wcout << L"Запись " << nRecord << L" успешно обновлена!" << std::endl;
+            std::wcout << L"Число непустых записей: " << sHeader.cValidRecords << std::endl;
         }
         else
         {
