@@ -15,6 +15,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решен
 		Misc\ComparisonCPPerfomance.md = Misc\ComparisonCPPerfomance.md
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RecordManager", "RecordManager\RecordManager.vcxproj", "{67DFA87B-8D3D-4757-896B-2F671DDEB5ED}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F449F592-817B-4276-842A-877BB0A84C0C} = {F449F592-817B-4276-842A-877BB0A84C0C}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -29,6 +34,10 @@ Global
 		{F449F592-817B-4276-842A-877BB0A84C0C}.Debug|x86.Build.0 = Debug|Win32
 		{F449F592-817B-4276-842A-877BB0A84C0C}.Release|x86.ActiveCfg = Release|Win32
 		{F449F592-817B-4276-842A-877BB0A84C0C}.Release|x86.Build.0 = Release|Win32
+		{67DFA87B-8D3D-4757-896B-2F671DDEB5ED}.Debug|x86.ActiveCfg = Debug|Win32
+		{67DFA87B-8D3D-4757-896B-2F671DDEB5ED}.Debug|x86.Build.0 = Debug|Win32
+		{67DFA87B-8D3D-4757-896B-2F671DDEB5ED}.Release|x86.ActiveCfg = Release|Win32
+		{67DFA87B-8D3D-4757-896B-2F671DDEB5ED}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
